@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
     password: String,
     description:String,
     isCompany: Boolean,
-    rating: Number,
+    rating: [Number],
     // For company
     postedJobs: [mongoose.Schema.Types.ObjectId],
     // For user
