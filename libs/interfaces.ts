@@ -17,7 +17,7 @@ export interface User {
     password:string,
     description:string,
     isCompany:boolean,
-    rating:number,
+    rating:number[],
     // For company
     postedJobs: Job[],
     // For user
@@ -30,7 +30,7 @@ export interface Job {
     seniority:string,
     // Here, company id is provided, when user clicks on company's name on a job, it redirects to /companies/:id 
     companyId:string,
-    tag: Tag,
+    tagId: string,
     description:string,
     lookingForDescription:string,
     companyOffersDescription:string,
@@ -42,10 +42,10 @@ export interface Job {
 export interface Candidate {
     userId:string,
     username:string,
-    rating:number
 }
 
 export interface Tag {
+    _id?:string,
     name:string,
     jobs: string[]
 }

@@ -5,5 +5,6 @@ const tagSchema = new mongoose.Schema({
     jobs: [mongoose.Schema.Types.ObjectId], // References to jobs with this tag
 });
 
-const TagModel = mongoose.models.TagModel || mongoose.model('Tags', tagSchema);
+const Tags = mongoose.models.Tags || mongoose.model('Tags', tagSchema);
+const TagModel = Tags;
 export default TagModel;
