@@ -20,7 +20,7 @@ export async function POST(request:Request) {
         await dbConnect();
         await UserModel.create(userBody);
 
-        return new Response(JSON.stringify({message:"User created"}), {status:201});
+        return new Response(JSON.stringify(userBody), {status:201});
     } catch(err) {
         return new Response(JSON.stringify({errorMessage:err}), {status:500});
     }

@@ -2,15 +2,16 @@ import dbConnect from "@/database/mongo-config";
 import { Tag } from "@/libs/interfaces";
 import TagModel from "@/models/tag-model";
 
-// Get all users
+// Get all tags
 export async function GET(request:Request) {
     try{
         await dbConnect();
-        const tags = await TagModel.find({}) satisfies Tag[];
-        return new Response(JSON.stringify(tags), {status:201});
     } catch (err) {
         return new Response(JSON.stringify({errorMessage:err}), {status:500});
     }
+    
+    const tags = await TagModel.find({}) satisfies Tag[];
+    return new Response(JSON.stringify(tags), {status:201});
 }
 
 // Create a user
