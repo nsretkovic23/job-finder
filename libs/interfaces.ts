@@ -19,9 +19,9 @@ export interface User {
     isCompany:boolean,
     rating:number[],
     // For company
-    postedJobs: Job[],
+    postedJobs: ShortJobInfo[],
     // For user
-    jobsApplied: Job[],
+    jobsApplied: ShortJobInfo[],
 }
 
 export interface Job {
@@ -44,8 +44,18 @@ export interface Candidate {
     username:string,
 }
 
+export interface ShortJobInfo {
+    jobId:string,
+    jobTitle:string
+}
+
 export interface Tag {
     _id?:string,
     name:string,
     jobs: string[]
+}
+
+export interface LoginCredentials {
+    username:string,
+    password:string
 }

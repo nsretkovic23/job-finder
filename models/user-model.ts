@@ -8,9 +8,15 @@ const userSchema = new mongoose.Schema({
     isCompany: Boolean,
     rating: [Number],
     // For company
-    postedJobs: [mongoose.Schema.Types.ObjectId],
+    postedJobs: [{
+      jobId: mongoose.Schema.Types.ObjectId,
+      jobTitle: String
+    }],
     // For user
-    jobsApplied: [mongoose.Schema.Types.ObjectId],
+    jobsApplied: [{
+      jobId: mongoose.Schema.Types.ObjectId,
+      jobTitle: String
+    }],
   }, {timestamps:true});
 
   const User = mongoose.models.User || mongoose.model('User', userSchema);
