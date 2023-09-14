@@ -21,27 +21,34 @@ export async function GET(request:Request, { params }:{params:any}) {
 
 // Update job by id
 export async function PATCH(request:Request, {params}:{params:any}) {
+    const {id} = params;
     try{
-        const {id} = params;
         await dbConnect();
-        let jobBody = await request.json() as Job;
-        await JobModel.findByIdAndUpdate(id, jobBody);
-
-        return new Response(JSON.stringify({message:`Updated job with id: ${id}`}), {status:200});
     } catch(err) {
         return new Response(JSON.stringify({errorMessage:err}), {status:500});
     }
+
+    let jobBody = await request.json() as Job;
+    let updatedJob = await JobModel.findByIdAndUpdate(id, jobBody, {new:true});
+    if(updatedJob) {
+        return new Response(JSON.stringify(updatedJob), {status:200});
+    }
+    
+    return new Response(JSON.stringify({errorMessage:`Job with id ${id} not found`}), {status:404});
 }
 
 // Delete job by id
 export async function DELETE(request:Request, {params}:{params:any}) {
+    const {id} = params;
     try{
-        const {id} = params;
         await dbConnect();
-        await JobModel.findByIdAndDelete(id);
-
-        return new Response(JSON.stringify({message:`Deleted job with id: ${id}`}), {status:200});
     } catch (err) {
         return new Response(JSON.stringify({errorMessage:err}), {status:500});
     }
+    const job = await JobModel.findByIdAndDelete(id);
+    if(job) {
+        return new Response(JSON.stringify({message:`Deleted job with id: ${id}`}), {status:200});
+    } 
+    
+    return new Response(JSON.stringify({errorMessage:`Job with id ${id} not found`}), {status:404});
 }
