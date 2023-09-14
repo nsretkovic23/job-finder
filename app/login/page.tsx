@@ -1,8 +1,8 @@
 "use client";
-import React, { useState } from "react";
-import { logIn, logOut } from "@/redux/features/auth-slice";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/redux/store";
+import React, { useContext, useEffect, useState } from "react";
+import { useRouter } from 'next/navigation';
+import useLocalStorageAuthentication from '@/context/useLocalStorageAuthentication';
+import { UserContext, UserContextType } from '@/context/user-context';
 import {
   Container,
   Typography,
@@ -13,6 +13,9 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
+import { apiURI } from "@/libs/constants";
+import { LoginCredentials, User } from "@/libs/interfaces";
+import { AltRoute } from "@mui/icons-material";
 
 interface UserData {
   name: string;
@@ -28,12 +31,77 @@ const initialUserData: UserData = {
   isCompany: false,
 };
 
-
-
 function Login() {
   const [userData, setUserData] = useState<UserData>(initialUserData);
   const [isCompany, setIsCompany] = useState<boolean>(false);
   const [signUpMode, setSignUpMode] = useState<boolean>(false);
+  const fetchedUser = useLocalStorageAuthentication(false);
+  const {user, setLoggedInUser, setCredentialsToLocalStorage} = useContext(UserContext) as UserContextType;
+  const router = useRouter();
+
+  useEffect(() => {
+    if(!user && fetchedUser) {
+      setLoggedInUser(fetchedUser);
+      router.push('/')
+    } else if(user) {
+      router.push('/');
+    }
+  },[fetchedUser, router, user, setLoggedInUser])
+
+  const loginUser = () => {
+    if(userData.username === "" || userData.password === "") {
+      alert("Enter username and password");
+      return;
+    }
+
+    fetch(`${apiURI}/users/${userData.username}/${userData.password}`)
+    .then(res => res.json())
+    .then(data => {
+      if(data.errorMessage) {
+        alert("Wrong Credentials");
+      } else {
+        setLoggedInUser(data);
+        setCredentialsToLocalStorage({username:data.username, password:data.password} satisfies LoginCredentials);
+        router.push('/');
+      }
+    })
+  }
+
+  const signUpUser = () => {
+    if(userData.username === "" || userData.password === "" || userData.name === "") {
+      alert("Provide information");
+      return;
+    }
+
+    const createdUser = {
+      fullName:userData.name,
+      username:userData.username,
+      password:userData.password,
+      isCompany:userData.isCompany,
+      description:"",
+      rating:[],
+      postedJobs:[],
+      jobsApplied:[]
+    } satisfies User;
+
+    fetch(`${apiURI}/users/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(createdUser),
+      })
+      .then(res => res.json())
+      .then(data => {
+      if(data.errorMessage) {
+        alert(data.errorMessage)
+      } else {
+        console.log(data);
+        setLoggedInUser(data);
+        setCredentialsToLocalStorage({username:data.username, password:data.password} satisfies LoginCredentials);
+        router.push('/');
+      }
+      })
+  }
+
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -50,19 +118,14 @@ function Login() {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const data = {...userData, isCompany}
 
     if(!signUpMode) {
-      console.log("Contact GET to try to get user");
-      console.log(data);
+      loginUser();
     } else
     {
       console.log("Contact POST to try to register user API");
-      console.log(data);
+      signUpUser()
     }
-    
-    // Reset the form
-    setUserData(initialUserData);
   };
 
   return (
@@ -72,7 +135,6 @@ function Login() {
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
-        backgroundColor: "white",
       }}
     >
       <Card elevation={3}>
@@ -109,12 +171,16 @@ function Login() {
                 onChange={handleInputChange}
                 margin="normal"
               />
-              <FormControlLabel
-                control={
-                  <Switch checked={isCompany} onChange={handleSwitchChange} />
-                }
-                label={isCompany ? "Company" : "User"}
-              />
+              {
+                signUpMode ?
+                <FormControlLabel
+                  control={
+                    <Switch checked={isCompany} onChange={handleSwitchChange} />
+                  }
+                  label={isCompany ? "Company" : "User"}
+                />: null
+              }
+              
               <Button type="submit" variant="contained" color="primary">
                 {signUpMode ? "Sign Up" : "Sign In"}
               </Button>
