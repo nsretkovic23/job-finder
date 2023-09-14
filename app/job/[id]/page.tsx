@@ -15,15 +15,10 @@ import {
 } from '@mui/material';
 import { Person, Business, LocationOn, BusinessCenter, Description, Search, LocalOffer, ApiRounded } from '@mui/icons-material';
 import Link from 'next/link';
-import { Candidate, Job } from '@/libs/interfaces';
+import { Candidate, Job, ShortJobInfo } from '@/libs/interfaces';
 import { apiURI } from '@/libs/constants';
 import { UserContext, UserContextType } from '@/context/user-context';
 import { useRouter } from 'next/navigation';
-
-interface JobPageProps {
-  job: Job;
-}
-
 
 const JobPage = ({params}:{params:{id:string}}) => {
   const [job, setJob] = useState<Job>();
@@ -37,34 +32,6 @@ const JobPage = ({params}:{params:{id:string}}) => {
   const [newCompanyOffers, setNewCompanyOffers] = useState<string>("");
   const router = useRouter(); 
 
-  // TODO: REMOVE TEST CANDIDATES
-  const [testCandidates, setTestCand] = useState<Candidate[]>([{
-    userId:"6501c251f1d2853e5340c693",
-    username:"nsretkovic"
-  },{
-    userId:"6501c251f1d2853e5340c693",
-    username:"nsretkovic2"
-  },{
-    userId:"6501c251f1d2853e5340c693",
-    username:"nsretkovic3"
-  },
-  {
-    userId:"6501c251f1d2853e5340c693",
-    username:"nsretkovic4"
-  },
-  {
-    userId:"6501c251f1d2853e5340c693",
-    username:"nsretkovic5"
-  },
-  {
-    userId:"6501c251f1d2853e5340c693",
-    username:"nsretkovic6"
-  },
-  {
-    userId:"6501c251f1d2853e5340c693",
-    username:"nsretkovic7"
-  },])
-
   useEffect(() => {
     if(job) {
       setNewTitle(job.title);
@@ -74,6 +41,43 @@ const JobPage = ({params}:{params:{id:string}}) => {
       setNewCompanyOffers(job.companyOffersDescription);
     }
   }, [job])
+
+  const applyForJob = async () => {
+    if(!job || !user || user.isCompany || !user._id || !job._id) return;
+
+    const updatedJob = {
+      ...job
+    } satisfies Job;
+    updatedJob.candidates.push({userId:user._id, username:user.username} satisfies Candidate);
+
+    const updatedUser = {
+      ...user
+    };
+    updatedUser.jobsApplied.push({jobId:job._id, jobTitle:job.title} satisfies ShortJobInfo)
+
+    const jobResponse = await fetch(`${apiURI}/jobs/${job._id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedJob),
+    });
+    const jobData = await jobResponse.json();
+    if(jobData.errorMessage) {
+      alert(jobData.errorMessage);
+      return;
+    } else {
+      setJob(jobData);
+    }
+
+    const userResponse = await fetch(`${apiURI}/users/${user._id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedUser),
+    });
+    const userData = await userResponse.json();
+    if(userData.errorMessage) {
+      alert(userData.errorMessage);
+    }
+  }
 
   const isInputValid = ():boolean => {
     if(newTitle === "" 
@@ -86,17 +90,37 @@ const JobPage = ({params}:{params:{id:string}}) => {
     return true;
   }
 
-  const deleteJob = () => {
-    fetch(`${apiURI}/jobs/${job?._id}`, {method:'DELETE'})
-    .then(res => res.json())
-    .then(data => {
-      if(data.errorMessage) {
-        alert(data.errorMessage);
-        return;
-      }
+  const deleteJob = async () => {
+    if(!job || !user || !user.isCompany || !user._id || !job._id) return;
 
+    const updatedCompany = {
+      ...user
+    }
+    const index = user.postedJobs.findIndex(j => j.jobId === job._id);
+    if(index !== -1) {
+      user.postedJobs.splice(index,1);
+    } else {
+      return;
+    }
+
+    const jobResponse = await fetch(`${apiURI}/jobs/${job?._id}`, {method:'DELETE'});
+    const jobData = await jobResponse.json();
+    if(jobData.errorMessage) {
+      alert(jobData.errorMessage);
+      return;
+    }
+    
+    const companyResponse = await fetch(`${apiURI}/users/${user._id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedCompany),
+    });
+    const companyData = await companyResponse.json();
+    if(companyData.errorMessage) {
+      alert(companyData.errorMessage);
+    } else {
       router.replace('/');
-    })
+    }
   }
 
   const updateJob = () => {
@@ -142,11 +166,10 @@ const JobPage = ({params}:{params:{id:string}}) => {
         if(data.errorMessage) {
           setJobNotFound(true);
         } else {
-          testCandidates.forEach(cand => data.candidates.push(cand));
           setJob(data);
         }
     })
-  }, [params.id, testCandidates])
+  }, [params.id])
 
   if(jobNotFound) {
     return (<h3 style={{ maxWidth: 500, margin: "0 auto", marginTop: "2rem" }}>
@@ -212,6 +235,7 @@ const JobPage = ({params}:{params:{id:string}}) => {
           </List>
         </div>
       </CardContent>
+      
         {job.companyInfo[0].companyId === user?._id ?
           <div>
             <Button variant="contained" sx={{marginRight:1, marginLeft:2,marginBottom:1}} onClick={() => setEditActive(true)}>Edit Job</Button>
@@ -265,6 +289,16 @@ const JobPage = ({params}:{params:{id:string}}) => {
         <Button variant="contained" color="error" sx={{marginBottom:1}} onClick={() => setEditActive(false)}>Cancel Edit</Button>
       </Box>
       : null}
+      {user && !user?.isCompany && !job?.candidates.some(c => c.userId === user?._id) ?
+        <div>
+          <Button variant="contained" color="success" sx={{marginRight:1, marginLeft:2,marginBottom:1}} onClick={() => applyForJob()}>Apply for job</Button>
+        </div> : null 
+      }
+      {user && !user?.isCompany && job?.candidates.some(c => c.userId === user?._id) ?
+        <div>
+          <Button variant="contained" disabled color="success" sx={{marginRight:1, marginLeft:2,marginBottom:1}}>You already applied!</Button>
+        </div> : null
+      }
     </Card>
   );
 };
