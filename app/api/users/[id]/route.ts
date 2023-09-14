@@ -32,6 +32,7 @@ export async function PATCH(request:Request, {params}:{params:any}) {
     }
 }
 
+// Delete user by id
 export async function DELETE(request:Request, {params}:{params:any}) {
     try{
         const {id} = params;

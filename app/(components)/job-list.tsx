@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, CardContent, Typography, Button, CardActions, IconButton, Divider } from '@mui/material';
 import { ArrowForward, PermIdentity, PersonSearch, Place, Work } from '@mui/icons-material';
 import { Job } from '@/libs/interfaces';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 interface JobListProps {

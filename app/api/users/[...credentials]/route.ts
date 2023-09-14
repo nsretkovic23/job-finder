@@ -1,6 +1,7 @@
 import dbConnect from "@/database/mongo-config";
 import UserModel from "@/models/user-model";
 
+// Get user with provided credentials (interface {username, password})
 export async function GET(request:Request, {params}:{params:any}) {
     const [username, password] = params.credentials;
     try{

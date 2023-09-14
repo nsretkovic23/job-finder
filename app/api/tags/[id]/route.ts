@@ -2,7 +2,7 @@ import dbConnect from "@/database/mongo-config";
 import { Tag } from "@/libs/interfaces";
 import TagModel from "@/models/tag-model";
 
-// Get user by id
+// Get tag by id
 export async function GET(request:Request, { params }:{params:any}) {
     try{
         const {id} = params;
@@ -19,7 +19,7 @@ export async function GET(request:Request, { params }:{params:any}) {
     }
 }
 
-// Update user by id
+// Update tag by id
 export async function PATCH(request:Request, {params}:{params:any}) {
     try{
         const {id} = params;
@@ -33,6 +33,7 @@ export async function PATCH(request:Request, {params}:{params:any}) {
     }
 }
 
+// Delete tag by id
 export async function DELETE(request:Request, {params}:{params:any}) {
     try{
         const {id} = params;

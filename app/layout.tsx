@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Header from './(components)/header'
 import UserProvider from '@/context/user-context';
+import { useEffect } from 'react';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,6 +18,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+
+  useEffect(() => {
+    document.title = "Job Finder";
+  },[])
+  
   return (
     <UserProvider>
     <html lang="en">

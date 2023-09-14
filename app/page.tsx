@@ -10,7 +10,7 @@ import { UserContext, UserContextType } from '@/context/user-context';
 export default function Home() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const fetchedUser = useLocalStorageAuthentication(false);
-  const {user, setCredentialsToLocalStorage, setLoggedInUser, logoutUser} = useContext(UserContext) as UserContextType;
+  const {user, setLoggedInUser} = useContext(UserContext) as UserContextType;
 
   useEffect(() => {
     if(!user && fetchedUser) {

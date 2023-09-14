@@ -29,7 +29,6 @@ function UserInformation({params}:{params:{id:string}}) {
   const [isEditActive, setEditActive] = useState<boolean>(false);
   const {user} = useContext(UserContext) as UserContextType;
 
-
   useEffect(() => {
     fetch(`${apiURI}/users/${params.id}`)
     .then(response => response.json())
