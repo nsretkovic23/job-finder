@@ -18,9 +18,9 @@ export async function POST(request:Request) {
     try {
         let userBody = await request.json() as User;
         await dbConnect();
-        await UserModel.create(userBody);
+        const newUser = await UserModel.create(userBody);
 
-        return new Response(JSON.stringify(userBody), {status:201});
+        return new Response(JSON.stringify(newUser), {status:201});
     } catch(err) {
         return new Response(JSON.stringify({errorMessage:err}), {status:500});
     }
