@@ -1,10 +1,12 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+## Job Finder web aplikacija
 
-First, run the development server:
+Pokretanje:
 
 ```bash
+prvo: npm install
+zatim:
 npm run dev
 # or
 yarn dev
@@ -12,23 +14,32 @@ yarn dev
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Otvoriti [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## API routes
+U Nextu se rutiranje radi pomocu foldera, par primera:
+```
+Folderi: app/api/users/route.ts - API endpoint je: localhost:3000/api/users
+Folderi: app/api/users/[id]/route.ts - API endpoint je: localhost:3000/api/users/{USERID}
+Folderi: app/api/users/[...credentials]/route.ts - API endpoint je: localhost:3000/api/users/{USERID}/{USERPASSWORD}
+```
+Ovo takodje vazi i za frontend, s tim sto je frontend sve sto je van api foldera.
+Ukoliko se neke komponente nalaze u folderu (imeFoldera), ta putanja se ignorise.
+Recimo ukoliko postoji:
+```
+app/(components)/header.tsx - Ne postoji endpoint na frontu za tu putanju
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-## Learn More
+## Funkcionalnost
+U aplikaciji se mogu listati poslovi bez obzira da li je korisnik ulogovan ili ne.
+Klikom na "Person" ikonicu na header-u, moze se otici na login stranu.
+Tu se moze izabrati ili sign in ili sign up. 
+```
+Test account za usera: username: nsretkovicc, password: nikola
+Test account za kompaniju: username: nsretkovicCompany, password: nikola
+```
+Ukoliko je korisnik "obican user" on moze pretrazivati poslove na pocetnoj strani i prijaviti se na posao, takodje ima svoj profil koji moze menjati.
+Ukoliko je korisnik kompanija, moze kreirati menjati i brisati poslove koje je ta kompanija kreirala. Ima svoj profil koji takodje moze menjati.
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
