@@ -10,7 +10,7 @@ export async function GET(request:Request, { params }:{params:any}) {
         const user = await UserModel.findById(id);
 
         if(user) {
-            return new Response(JSON.stringify(user), {status:201});
+            return new Response(JSON.stringify(user), {status:200});
         }
         
     } catch (err) {
