@@ -16,11 +16,11 @@ export async function GET(request:Request) {
 // Create a job
 export async function POST(request:Request) {
     try {
-        let userBody = await request.json() as Job;
+        let jobBody = await request.json() as Job;
         await dbConnect();
-        await JobModel.create(userBody);
+        const newJob = await JobModel.create(jobBody);
 
-        return new Response(JSON.stringify({message:"Job created"}), {status:201});
+        return new Response(JSON.stringify(newJob), {status:201});
     } catch(err) {
         return new Response(JSON.stringify({errorMessage:err}), {status:500});
     }
