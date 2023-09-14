@@ -25,9 +25,9 @@ export async function PATCH(request:Request, {params}:{params:any}) {
         const {id} = params;
         await dbConnect();
         let tagBody = await request.json() as Tag;
-        await TagModel.findByIdAndUpdate(id, tagBody);
+        const updatedTag = await TagModel.findByIdAndUpdate(id, tagBody, {new:true});
 
-        return new Response(JSON.stringify({message:`Updated tag with id: ${id}`}), {status:200});
+        return new Response(JSON.stringify(updatedTag), {status:200});
     } catch(err) {
         return new Response(JSON.stringify({errorMessage:err}), {status:500});
     }
