@@ -29,13 +29,19 @@ export interface Job {
     title:string,
     seniority:string,
     // Here, company id is provided, when user clicks on company's name on a job, it redirects to /companies/:id 
-    companyId:string,
-    tagId: string,
+    companyInfo:ShortCompanyInfo[]
+    tagName: string,
     description:string,
     lookingForDescription:string,
     companyOffersDescription:string,
     location:string,
     candidates: Candidate[]
+}
+
+export interface Tag {
+    _id?:string,
+    name:string,
+    jobs: string[]
 }
 
 // Short information about a user that will be displayed when user applies as a candidate for a job
@@ -49,13 +55,18 @@ export interface ShortJobInfo {
     jobTitle:string
 }
 
-export interface Tag {
-    _id?:string,
-    name:string,
-    jobs: string[]
+export interface ShortCompanyInfo {
+    companyId?:string,
+    companyName:string
+}
+
+export interface ShortTagInfo {
+    tagId:string,
+    tagName:string
 }
 
 export interface LoginCredentials {
     username:string,
-    password:string
+    password:string,
+    isCompany?:boolean
 }

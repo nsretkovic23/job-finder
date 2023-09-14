@@ -3,8 +3,11 @@ import mongoose from "mongoose";
 const jobSchema = new mongoose.Schema({
     title:String,
     seniority:String,
-    companyId: mongoose.Schema.Types.ObjectId, // Reference to the user who posted the job
-    tagId: mongoose.Schema.Types.ObjectId, // References to tags
+    companyInfo: [{
+      companyId:mongoose.Schema.Types.ObjectId,
+      companyName:String
+    }], // Reference to the user who posted the job
+    tagName:String, // References to tags
     description: String, // Description of the job
     lookingForDescription:String,
     companyOffersDescription:String,
