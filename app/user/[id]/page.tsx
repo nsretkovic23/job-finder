@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -17,59 +17,18 @@ import { AccountCircle, Business, Description, Star } from "@mui/icons-material"
 import { User } from "@/libs/interfaces";
 import Link from "next/link";
 import { apiURI } from "@/libs/constants";
-
-
-// TODO: Use this code for creating user - data returned is user if success
-// useEffect(() => {
-//     const create = {
-//         fullName: "Nikola Sretkovic",
-//         username: "nsretkovic",
-//         password: "nikola",
-//         description: "Hello I'm nikola, Unity developer",
-//         isCompany: false,
-//         rating: [3, 4, 5, 5],
-//         postedJobs: [
-//           {
-//             jobId: "6500f7edc6bc6c78bdae00b0",
-//             jobTitle: "Unity Game Dev",
-//           },
-//           {
-//             jobId: "6500f855c6bc6c78bdae00b3",
-//             jobTitle: "Node js backend dev",
-//           },
-//         ],
-//         jobsApplied: [
-//           {
-//             jobId: "6500f7edc6bc6c78bdae00b0",
-//             jobTitle: "Unity Game Dev",
-//           },
-//           {
-//             jobId: "6500f855c6bc6c78bdae00b3",
-//             jobTitle: "Node js backend dev",
-//           },
-//         ],
-//       } satisfies User;
-
-//       fetch(`${apiURI}/users/`, {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(create),
-//       })
-//       .then(response => response.json())
-//       .then(data => {
-//         console.log(data);
-//       })
-//   }, [])
-
+import { UserContext, UserContextType } from "@/context/user-context";
 
 function UserInformation({params}:{params:{id:string}}) {
-  const [user, setUser] = useState<User>();
+  const [fetchedUser, setFetchedUser] = useState<User>();
   const [userNotFound, setUserNotFound] = useState<boolean>(false);
   const [newUsername, setNewUsername] = useState<string>("");
   const [newFullName, setNewFullName] = useState<string>("");
   const [newBio, setNewBio] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [isEditActive, setEditActive] = useState<boolean>(false);
+  const {user} = useContext(UserContext) as UserContextType;
+
 
   useEffect(() => {
     fetch(`${apiURI}/users/${params.id}`)
@@ -78,10 +37,19 @@ function UserInformation({params}:{params:{id:string}}) {
         if(data.errorMessage) {
             setUserNotFound(true);
         } else {
-            setUser(data);
+          setFetchedUser(data);
         }
     })
   }, [params.id])
+
+  useEffect(() =>{
+    if(fetchedUser) {
+      setNewUsername(fetchedUser.username);
+      setNewFullName(fetchedUser.fullName);
+      setNewBio(fetchedUser.description);
+      setNewPassword(fetchedUser.password);
+    }
+  },[fetchedUser])
 
   function isInputValid() :boolean {
     if(newUsername === "" || newFullName === "" || newPassword === "") {
@@ -96,7 +64,7 @@ function UserInformation({params}:{params:{id:string}}) {
         </h3>)
   }
 
-  if(!user) {
+  if(!fetchedUser) {
     return(<h3 style={{ textAlign:"center", margin: "0 auto", marginTop: "2rem" }}>
     {`Loading...`}
     </h3>)
@@ -109,21 +77,21 @@ function UserInformation({params}:{params:{id:string}}) {
     } else {
       setEditActive(false);
     }
-    if(!user) return;
+    if(!fetchedUser) return;
 
     const updatedUser = {
       fullName:newFullName,
       username:newUsername,
       password:newPassword,
       description:newBio,
-      isCompany:user.isCompany,
-      rating:user.rating,
-      postedJobs:user.postedJobs,
-      jobsApplied:user.jobsApplied
+      isCompany:fetchedUser.isCompany,
+      rating:fetchedUser.rating,
+      postedJobs:fetchedUser.postedJobs,
+      jobsApplied:fetchedUser.jobsApplied
     } satisfies User;
 
     console.log(updatedUser);
-    fetch(`${apiURI}/users/${user._id}`, {
+    fetch(`${apiURI}/users/${fetchedUser._id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(updatedUser),
@@ -144,17 +112,17 @@ function UserInformation({params}:{params:{id:string}}) {
       elevation={3}
     >
       <CardContent>
-        {user.isCompany ? (
+        {fetchedUser.isCompany ? (
           <Typography variant="h5" component="div">
             <Business /> Company <br />
             <Divider flexItem sx={{marginTop: "3px", marginBottom:"3px"}}/>
-            {user.fullName} - @{user.username}
+            {fetchedUser.fullName} - @{fetchedUser.username}
           </Typography>
         ) : (
           <Typography variant="h5" component="div">
             <AccountCircle /> Developer <br />
             <Divider flexItem sx={{marginTop: "3px", marginBottom:"3px"}}/>
-            {user.fullName} - @{user.username}
+            {fetchedUser.fullName} - @{fetchedUser.username}
           </Typography>
         )}
         <Divider flexItem />
@@ -164,12 +132,12 @@ function UserInformation({params}:{params:{id:string}}) {
           color="text.secondary"
           sx={{ marginTop: 2 }}
         >
-          <Description/> Bio: {user.description}
+          <Description/> Bio: {fetchedUser.description}
         </Typography>
 
         <Divider flexItem sx={{marginTop: 2}}/>
 
-        {user.isCompany ? (
+        {fetchedUser.isCompany ? (
           <div>
             <Typography
               variant="h6"
@@ -179,7 +147,7 @@ function UserInformation({params}:{params:{id:string}}) {
               Posted Jobs
             </Typography>
             <List>
-              {user.postedJobs.map((job) => (
+              {fetchedUser.postedJobs.map((job) => (
                 <ListItem
                   key={job.jobId}
                   component={Link}
@@ -211,7 +179,7 @@ function UserInformation({params}:{params:{id:string}}) {
               Jobs Applied
             </Typography>
             <List>
-              {user.jobsApplied.map((job) => (
+              {fetchedUser.jobsApplied.map((job) => (
                 <ListItem
                   key={job.jobId}
                   component={Link}
@@ -235,10 +203,11 @@ function UserInformation({params}:{params:{id:string}}) {
           </div>
         )}
       </CardContent>
+      {fetchedUser._id === user?._id ? 
       <div>
         <Button variant="contained" sx={{marginRight:1, marginLeft:2,marginBottom:1}} onClick={() => setEditActive(true)}>Edit Profile</Button>
-        <Button variant="contained" color="error" sx={{marginBottom:1}}>Delete Profile</Button>
-      </div>
+      </div> : null}
+      
       {isEditActive ? 
       <Box style={{marginLeft:15, marginTop:10, marginRight:15}}>
         <TextField
@@ -246,7 +215,7 @@ function UserInformation({params}:{params:{id:string}}) {
             label="New username"
             name="New username"
             value={newUsername}
-            onChange={(event) => {setNewUsername(event?.target.value as string); console.log(newUsername)}}
+            onChange={(event) => {setNewUsername(event?.target.value as string);}}
             margin="normal"
         />
         <TextField
@@ -254,7 +223,7 @@ function UserInformation({params}:{params:{id:string}}) {
             label="New Full Name"
             name="New Full Name"
             value={newFullName}
-            onChange={(event) => {setNewFullName(event?.target.value as string); console.log(newFullName)}}
+            onChange={(event) => {setNewFullName(event?.target.value as string);}}
             margin="normal"
         />
         <TextField
@@ -262,7 +231,7 @@ function UserInformation({params}:{params:{id:string}}) {
             label="New bio"
             name="New bio"
             value={newBio}
-            onChange={(event) => {setNewBio(event?.target.value as string); console.log(newBio)}}
+            onChange={(event) => {setNewBio(event?.target.value as string);}}
             margin="normal"
         />
         <TextField
@@ -271,7 +240,7 @@ function UserInformation({params}:{params:{id:string}}) {
             name="New password"
             type="password"
             value={newPassword}
-            onChange={(event) => {setNewPassword(event?.target.value as string); console.log(newPassword)}}
+            onChange={(event) => {setNewPassword(event?.target.value as string);}}
             margin="normal"
         />
         <Button variant="contained" color="success" sx={{marginRight:1, marginLeft:0, marginBottom:1}} onClick={() => updateProfile()}>Confirm Edit</Button>

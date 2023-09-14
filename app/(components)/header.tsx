@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -10,29 +10,38 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import HomeIcon from '@mui/icons-material/Home';
-import { AccountCircle } from '@mui/icons-material';
+import { AccountCircle, Add } from '@mui/icons-material';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import useLocalStorageAuthentication from '@/context/useLocalStorageAuthentication';
+import { UserContext, UserContextType } from '@/context/user-context';
 
 
 function Header() {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-  // TODO: REVERT TO ONLY LOGIN BY DEFAULT 
-  const [accountOptions, setAccountOptions] = useState<string[]>(['Login','Profile', 'Logout']); 
-  // TODO: MODIFY THIS LOGIC WHEN LOGIN IS DONE
-  const [userId, setUserId] = useState<string>("6501c251f1d2853e5340c693");
+  const [accountOptions, setAccountOptions] = useState<string[]>(['Login']); 
   const router = useRouter();
 
-const accountOptionsHTML = accountOptions.map((option) => (
-        <MenuItem key={option} onClick={() => handleCloseUserMenu(option)}>
-          <Typography sx={{textDecoration:'none'}} textAlign="center">{option}</Typography>
-        </MenuItem>
-      ));
+  const fetchedUser = useLocalStorageAuthentication(false);
+  const {user, setLoggedInUser, logoutUser} = useContext(UserContext) as UserContextType;
 
-  const onUserLoggedIn = () => {
-    setAccountOptions(['Profile', 'Logout'])
-  }
+  useEffect(() => {
+    if(!user && fetchedUser) {
+      setLoggedInUser(fetchedUser);
+      setAccountOptions(['Profile', 'Logout'])
+    } else if (!user && !fetchedUser) {
+      setAccountOptions(['Login'])
+    } else if(user) {
+      setAccountOptions(['Profile', 'Logout'])
+    }
+  },[fetchedUser, user, setLoggedInUser])
+
+  const accountOptionsHTML = accountOptions.map((option) => (
+    <MenuItem key={option} onClick={() => handleCloseUserMenu(option)}>
+      <Typography sx={{textDecoration:'none'}} textAlign="center">{option}</Typography>
+    </MenuItem>
+  ));
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -49,11 +58,11 @@ const accountOptionsHTML = accountOptions.map((option) => (
     setAnchorElUser(null);
     switch(option) {
         case "Logout":
-            console.log("Handle Logout"); break;
+            logoutUser(); break;
         case "Login":
             router.push('/login'); break;
         case "Profile":
-            router.push(`/user/${userId}`)
+            router.push(`/user/${user?._id}`)
     }
   };
 
@@ -83,6 +92,11 @@ const accountOptionsHTML = accountOptions.map((option) => (
           </Typography>
 
           <Box sx={{ flexGrow: 1, display:'flex', justifyContent:'flex-end' }}>
+            
+            {user?.isCompany ? <Button onClick={() => router.push('/job/create')} style={{color:"white", backgroundColor:"#793FDF", marginRight:15}} variant="contained" startIcon={<Add/>}>
+                Create Job
+            </Button> : null}
+            
             <Tooltip title="Account">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 {/* <Avatar alt="Profile" src="././public/next.svg" /> */}

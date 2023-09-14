@@ -86,7 +86,7 @@ const JobPage = ({params}:{params:{id:string}}) => {
         </Typography>
         <Typography variant="body2" color="text.secondary">
           <Business /> Company:
-          <Link href={`/companies/${job.companyId}`}>{job.companyId}</Link>
+          <Link href={`/user/${job.companyInfo[0].companyId}`}>{job.companyInfo[0].companyName}</Link>
         </Typography>
         <Divider sx={{marginTop:"5px", marginBottom:"5px"}} flexItem/>
         <Typography variant="body2" color="text.secondary">
